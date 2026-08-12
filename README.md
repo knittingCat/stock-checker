@@ -33,7 +33,8 @@ local `config.json` (gitignored, so your URL/config never gets committed).
 This registers a `launchd` agent that wakes up every 10 minutes. By default
 it only actually re-fetches the page once an hour (`check_interval_minutes`
 in `config.json`) to avoid hammering the site — lower that value if you want
-tighter polling, e.g. every 10 minutes:
+tighter polling, e.g. every 10 minutes. Open `config.json` in a text editor
+(don't paste this into the terminal) and change the value:
 
 ```json
 {
@@ -68,8 +69,9 @@ allowed to notify.
 
 ## Customizing detection
 
-Edit the `out_of_stock_phrases` list in `config.json` to match the language
-a specific site uses:
+Open `config.json` in a text editor (don't paste this into the terminal) and
+edit the `out_of_stock_phrases` list to match the language a specific site
+uses:
 
 ```json
 {
