@@ -3,10 +3,23 @@
 Watches a product page and fires a native macOS desktop notification when it
 comes back in stock (or goes out of stock).
 
-It works on any site: it fetches the page's HTML and looks for common
-out-of-stock phrases ("out of stock", "sold out", "unavailable", ...). If
-none of those phrases are present, the page is considered in stock. Matching
-is case-insensitive.
+It fetches the page's HTML and looks for common out-of-stock phrases ("out
+of stock", "sold out", "unavailable", ...). If none of those phrases are
+present, the page is considered in stock. Matching is case-insensitive.
+
+This is a plain HTTP request, not a real browser, so it won't work on every
+site. Some retailers (especially large ones) run bot-detection/WAF systems
+that block this kind of request outright, regardless of what headers are
+sent. If that happens, `stock_checker.py --test` will print and log
+something like:
+
+```
+Fetch failed: HTTP Error 403: Forbidden
+```
+
+A 403 means the site actively refused the request — there's no config
+change here that fixes it. Try a different site, or check less-guarded
+smaller/niche retailers, which are much more likely to work.
 
 ## Requirements
 
