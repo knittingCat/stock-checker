@@ -66,9 +66,16 @@ allowed to notify.
 
 ## Customizing detection
 
-Open `config.json` in a text editor (don't paste this into the terminal) and
-edit the `out_of_stock_phrases` list to match the language a specific site
-uses:
+Open `config.json` in a text editor:
+
+```bash
+open -e config.json
+```
+
+(this opens it in TextEdit — use `open -a "Visual Studio Code" config.json`
+or your editor of choice instead if you prefer). Edit the
+`out_of_stock_phrases` list to match the language a specific site uses, save,
+and close the editor:
 
 ```json
 {
