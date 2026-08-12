@@ -16,7 +16,7 @@ is case-insensitive.
 ## Setup
 
 ```bash
-git clone <this repo>
+git clone https://github.com/knittingCat/stock-checker.git
 cd stock-checker
 python3 setup.py
 ```
