@@ -73,9 +73,12 @@ def strip_html(html: str) -> str:
 
 def determine_status(page_text: str, config: dict) -> str:
     out_phrases = [p.lower() for p in config.get("out_of_stock_phrases", [])]
+    in_phrases = [p.lower() for p in config.get("in_stock_phrases", [])]
 
     if any(phrase in page_text for phrase in out_phrases):
         return "OUT"
+    if in_phrases:
+        return "IN" if any(phrase in page_text for phrase in in_phrases) else "UNKNOWN"
     return "IN"
 
 
@@ -121,7 +124,9 @@ def main() -> None:
     if test_mode:
         print(f"{config['url']} -> {status}")
 
-    if test_mode or status != state.get("last_notified_status"):
+    if status == "UNKNOWN":
+        log("Could not determine stock status from page text — check in_stock_phrases/out_of_stock_phrases in config.json.")
+    elif test_mode or status != state.get("last_notified_status"):
         if status == "IN":
             send_notification("Back in stock!", config["url"])
         else:

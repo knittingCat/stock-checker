@@ -85,6 +85,25 @@ and close the editor:
 }
 ```
 
+By default, if none of the `out_of_stock_phrases` are found on the page, the
+product is considered in stock. You can optionally add an `in_stock_phrases`
+list too — if present, a page is only considered in stock when one of these
+phrases is actually found (useful for sites that don't have a clear
+"unavailable"-style label but do have a reliable "Add to Cart" button or
+similar):
+
+```json
+{
+  "url": "https://example.com/product",
+  "out_of_stock_phrases": ["out of stock", "sold out", "unavailable"],
+  "in_stock_phrases": ["add to cart", "add to bag", "buy now"],
+  "check_interval_minutes": 60
+}
+```
+
+If `in_stock_phrases` is set and neither list matches, the status is
+`UNKNOWN` — it's logged, but no notification is sent (avoids false alarms).
+
 ## Files
 
 - `stock_checker.py` — the checker itself
