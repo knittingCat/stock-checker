@@ -13,6 +13,16 @@ is case-insensitive.
 - macOS (uses `launchd` and `osascript` for notifications)
 - Python 3 (no extra packages required — stdlib only)
 
+Check whether you already have it:
+
+```bash
+python3 --version
+```
+
+If that prints `command not found`, install Python 3 from
+[python.org/downloads](https://www.python.org/downloads/) (download the
+macOS installer and run it), then reopen Terminal and try again.
+
 ## Setup
 
 ```bash
