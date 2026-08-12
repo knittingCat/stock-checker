@@ -70,7 +70,14 @@ To stop the background job:
 
 ## Test it manually
 
-Force an immediate check (bypasses the throttle) and print the result:
+Make sure you're in the `stock-checker` directory first (otherwise Python
+won't find the file):
+
+```bash
+cd ~/stock-checker
+```
+
+Then force an immediate check (bypasses the throttle) and print the result:
 
 ```bash
 python3 stock_checker.py --test
