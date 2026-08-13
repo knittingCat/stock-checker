@@ -68,6 +68,19 @@ To stop the background job:
 ./uninstall.sh
 ```
 
+### What happens while your Mac is asleep?
+
+`launchd` jobs don't run while the Mac is asleep — the 10-minute timer pauses
+along with everything else, so no checks (and no alerts) happen during that
+time. When the Mac wakes up, it doesn't try to catch up on every missed
+interval; it just resumes based on wall-clock time, and since more than 10
+minutes have elapsed, it fires again almost immediately after wake, then
+continues on the normal cadence from there. No action is needed from you.
+
+One caveat: if the product went in stock and back out again entirely during
+a sleep window (e.g. overnight), that change will be missed — it only knows
+what the page looks like at the moment it actually checks.
+
 ## Test it manually
 
 Make sure you're in the `stock-checker` directory first (otherwise Python
