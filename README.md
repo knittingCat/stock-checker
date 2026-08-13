@@ -1,4 +1,4 @@
-# stock-checker
+# Stock-Checker
 
 Watches a product page and fires a native macOS desktop notification when it
 comes back in stock (or goes out of stock).
