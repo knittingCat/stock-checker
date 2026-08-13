@@ -82,8 +82,18 @@ def determine_status(page_text: str, config: dict) -> str:
     return "IN"
 
 
-def send_notification(title: str, message: str) -> None:
-    script = f'display notification "{message}" with title "{title}" sound name "Glass"'
+def escape_applescript(text: str) -> str:
+    return text.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def send_alert(title: str, message: str) -> None:
+    # display dialog (unlike display notification) is a modal window that
+    # stays on screen until the user clicks OK, rather than auto-dismissing.
+    script = (
+        f'display dialog "{escape_applescript(message)}" '
+        f'with title "{escape_applescript(title)}" '
+        f'buttons {{"OK"}} default button "OK"'
+    )
     subprocess.run(["osascript", "-e", script], check=False)
 
 
@@ -124,18 +134,21 @@ def main() -> None:
     if test_mode:
         print(f"{config['url']} -> {status}")
 
+    previously_notified = state.get("last_notified_status")
+    should_alert = status != "UNKNOWN" and (test_mode or status != previously_notified)
+
     if status == "UNKNOWN":
         log("Could not determine stock status from page text — check in_stock_phrases/out_of_stock_phrases in config.json.")
-    elif test_mode or status != state.get("last_notified_status"):
-        if status == "IN":
-            send_notification("Back in stock!", config["url"])
-        else:
-            send_notification("Out of stock", config["url"])
+    elif should_alert:
         state["last_notified_status"] = status
 
     state["last_check"] = now.isoformat()
     state["last_status"] = status
-    save_state(state)
+    save_state(state)  # save before the blocking alert dialog so a stacked launchd run doesn't repeat
+
+    if should_alert:
+        title = "Back in stock!" if status == "IN" else "Out of stock"
+        send_alert(title, config["url"])
 
 
 if __name__ == "__main__":
