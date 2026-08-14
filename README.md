@@ -106,6 +106,17 @@ python3 stock_checker.py --test
 This also always fires a notification regardless of prior state, which is
 useful for confirming notifications are working end to end.
 
+If you're monitoring more than one URL, add part of the URL you want to
+test to only check that one instead of all of them:
+
+```bash
+python3 stock_checker.py --test mechanicalgifs
+```
+
+This matches against any configured URL containing that text
+(case-insensitive). If nothing matches, it tells you and exits instead of
+silently checking everything.
+
 ## Notifications
 
 Notifications are sent once per state transition — when the page flips from

@@ -106,7 +106,9 @@ def get_urls(config: dict) -> list:
 
 
 def main() -> None:
-    test_mode = "--test" in sys.argv
+    args = sys.argv[1:]
+    test_mode = "--test" in args
+    url_filter = next((a for a in args if a != "--test"), None)
 
     config = load_json(CONFIG_PATH, None)
     urls = get_urls(config) if config else []
@@ -116,6 +118,13 @@ def main() -> None:
         if test_mode:
             print(message)
         sys.exit(0)
+
+    if url_filter:
+        matched = [u for u in urls if url_filter.lower() in u.lower()]
+        if not matched:
+            print(f"No configured URL contains '{url_filter}'.")
+            sys.exit(1)
+        urls = matched
 
     interval_minutes = config.get("check_interval_minutes", 60)
     state = load_json(STATE_PATH, {"last_check": None, "urls": {}})
