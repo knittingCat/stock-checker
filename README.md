@@ -44,8 +44,12 @@ cd stock-checker
 python3 setup.py
 ```
 
-`setup.py` will prompt you for the product URL to monitor and save it to a
-local `config.json` (gitignored, so your URL/config never gets committed).
+`setup.py` will prompt you for one or more product URLs to monitor (enter
+them one at a time, blank line when done) and save them to a local
+`config.json` (gitignored, so your URLs/config never get committed). As you
+enter each URL, it immediately tries fetching it and prints an error message
+if that fails (e.g. a 403 error if the site blocks the request — see the
+note near the top of this README about what that means).
 
 ## Run it in the background
 
@@ -125,22 +129,27 @@ and close the editor:
 
 ```json
 {
-  "url": "https://example.com/product",
+  "urls": ["https://example.com/product"],
   "out_of_stock_phrases": ["out of stock", "sold out", "unavailable"],
   "check_interval_minutes": 60
 }
 ```
 
-By default, if none of the `out_of_stock_phrases` are found on the page, the
-product is considered in stock. You can optionally add an `in_stock_phrases`
-list too — if present, a page is only considered in stock when one of these
-phrases is actually found (useful for sites that don't have a clear
+Re-run `python3 setup.py` any time to change which URLs are monitored —
+it overwrites the `urls` list and clears old notification state. You can
+list as many product URLs as you want; each one gets its own independent
+in-stock/out-of-stock tracking and alerts. The same phrase lists apply to
+every URL in `urls`. By default, if none of
+the `out_of_stock_phrases` are found on a page, that product is considered
+in stock. You can optionally add an `in_stock_phrases` list too — if
+present, a page is only considered in stock when one of these phrases is
+actually found (useful for sites that don't have a clear
 "unavailable"-style label but do have a reliable "Add to Cart" button or
 similar):
 
 ```json
 {
-  "url": "https://example.com/product",
+  "urls": ["https://example.com/product"],
   "out_of_stock_phrases": ["out of stock", "sold out", "unavailable"],
   "in_stock_phrases": ["add to cart", "add to bag", "buy now"],
   "check_interval_minutes": 60

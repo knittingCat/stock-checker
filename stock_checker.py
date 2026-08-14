@@ -97,19 +97,29 @@ def send_alert(title: str, message: str) -> None:
     subprocess.run(["osascript", "-e", script], check=False)
 
 
+def get_urls(config: dict) -> list:
+    urls = config.get("urls")
+    if urls:
+        return urls
+    legacy_url = config.get("url")  # older configs used a single "url" key
+    return [legacy_url] if legacy_url else []
+
+
 def main() -> None:
     test_mode = "--test" in sys.argv
 
     config = load_json(CONFIG_PATH, None)
-    if not config or not config.get("url") or "example.com" in config["url"]:
-        message = "Config missing or still has placeholder URL — run setup.py first."
+    urls = get_urls(config) if config else []
+    if not config or not urls or any("example.com" in u for u in urls):
+        message = "Config missing or still has placeholder URL(s) — run setup.py first."
         log(message)
         if test_mode:
             print(message)
         sys.exit(0)
 
     interval_minutes = config.get("check_interval_minutes", 60)
-    state = load_json(STATE_PATH, {"last_check": None, "last_status": None, "last_notified_status": None})
+    state = load_json(STATE_PATH, {"last_check": None, "urls": {}})
+    url_states = state.setdefault("urls", {})
 
     now = datetime.now(timezone.utc)
     if not test_mode and state.get("last_check"):
@@ -118,37 +128,41 @@ def main() -> None:
         if elapsed_minutes < interval_minutes:
             return  # not time for the real check yet, stay quiet
 
-    try:
-        html = fetch_page(config["url"])
-    except Exception as exc:  # network errors, timeouts, etc.
-        log(f"Fetch failed: {exc}")
+    alerts_to_send = []  # (title, url) — fired only after state is saved, see below
+
+    for url in urls:
+        url_state = url_states.setdefault(url, {"last_status": None, "last_notified_status": None})
+
+        try:
+            html = fetch_page(url)
+        except Exception as exc:  # network errors, timeouts, etc.
+            log(f"Fetch failed for {url}: {exc}")
+            if test_mode:
+                print(f"{url} -> Fetch failed: {exc}")
+            continue
+
+        page_text = strip_html(html)
+        status = determine_status(page_text, config)
+        log(f"Checked {url} -> {status}")
         if test_mode:
-            print(f"Fetch failed: {exc}")
-        state["last_check"] = now.isoformat()
-        save_state(state)
-        return
+            print(f"{url} -> {status}")
 
-    page_text = strip_html(html)
-    status = determine_status(page_text, config)
-    log(f"Checked {config['url']} -> {status}")
-    if test_mode:
-        print(f"{config['url']} -> {status}")
+        if status == "UNKNOWN":
+            log(f"Could not determine stock status for {url} — check in_stock_phrases/out_of_stock_phrases in config.json.")
+        else:
+            previously_notified = url_state.get("last_notified_status")
+            if test_mode or status != previously_notified:
+                url_state["last_notified_status"] = status
+                title = "Back in stock!" if status == "IN" else "Out of stock"
+                alerts_to_send.append((title, url))
 
-    previously_notified = state.get("last_notified_status")
-    should_alert = status != "UNKNOWN" and (test_mode or status != previously_notified)
-
-    if status == "UNKNOWN":
-        log("Could not determine stock status from page text — check in_stock_phrases/out_of_stock_phrases in config.json.")
-    elif should_alert:
-        state["last_notified_status"] = status
+        url_state["last_status"] = status
 
     state["last_check"] = now.isoformat()
-    state["last_status"] = status
-    save_state(state)  # save before the blocking alert dialog so a stacked launchd run doesn't repeat
+    save_state(state)  # save before any blocking alert dialogs so a stacked launchd run doesn't repeat
 
-    if should_alert:
-        title = "Back in stock!" if status == "IN" else "Out of stock"
-        send_alert(title, config["url"])
+    for title, url in alerts_to_send:
+        send_alert(title, url)
 
 
 if __name__ == "__main__":
