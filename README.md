@@ -148,7 +148,7 @@ and close the editor:
 ```json
 {
   "urls": ["https://example.com/product"],
-  "out_of_stock_phrases": ["out of stock", "sold out", "unavailable"],
+  "out_of_stock_phrases": ["out of stock", "sold out"],
   "check_interval_minutes": 60
 }
 ```
@@ -156,19 +156,19 @@ and close the editor:
 Re-run `python3 setup.py` any time to change which URLs are monitored —
 it overwrites the `urls` list and clears old notification state. You can
 list as many product URLs as you want; each one gets its own independent
-in-stock/out-of-stock tracking and alerts. The same phrase lists apply to
-every URL in `urls`. By default, if none of
-the `out_of_stock_phrases` are found on a page, that product is considered
-in stock. You can optionally add an `in_stock_phrases` list too — if
-present, a page is only considered in stock when one of these phrases is
-actually found (useful for sites that don't have a clear
+in-stock/out-of-stock tracking and alerts. By default the top-level
+`out_of_stock_phrases`/`in_stock_phrases` lists apply to every URL. If
+none of the `out_of_stock_phrases` are found on a page, that product is
+considered in stock. You can optionally add an `in_stock_phrases` list too
+— if present, a page is only considered in stock when one of these phrases
+is actually found (useful for sites that don't have a clear
 "unavailable"-style label but do have a reliable "Add to Cart" button or
 similar):
 
 ```json
 {
   "urls": ["https://example.com/product"],
-  "out_of_stock_phrases": ["out of stock", "sold out", "unavailable"],
+  "out_of_stock_phrases": ["out of stock", "sold out"],
   "in_stock_phrases": ["add to cart", "add to bag", "buy now"],
   "check_interval_minutes": 60
 }
@@ -176,6 +176,47 @@ similar):
 
 If `in_stock_phrases` is set and neither list matches, the status is
 `UNKNOWN` — it's logged, but no notification is sent (avoids false alarms).
+
+### Per-URL phrase overrides
+
+Different sites use different wording, so a single shared phrase list
+doesn't always fit every URL you're monitoring. Instead of a plain string,
+any entry in `urls` can be an object with its own `out_of_stock_phrases`
+and/or `in_stock_phrases`, overriding the top-level defaults for just that
+URL. You can freely mix plain strings (using the shared defaults) and
+override objects in the same `urls` list:
+
+```json
+{
+  "urls": [
+    "https://example.com/uses-the-shared-defaults",
+    {
+      "url": "https://example.com/needs-its-own-rules",
+      "out_of_stock_phrases": ["currently unavailable"],
+      "in_stock_phrases": ["add to cart"]
+    }
+  ],
+  "out_of_stock_phrases": ["out of stock", "sold out"],
+  "check_interval_minutes": 60
+}
+```
+
+### Avoid overly generic phrases
+
+Be careful with single, generic words like `"unavailable"` on their own —
+they can false-match unrelated text on the page. For example, on Amazon
+listings, a broken product thumbnail's alt text literally says "image
+unavailable," which has nothing to do with stock status but still matches
+a bare `"unavailable"` phrase and reports the item as out of stock. Prefer
+more specific phrases (`"currently unavailable"`, `"out of stock"`,
+`"sold out"`) over single generic words.
+
+Large sites can also intermittently serve a stripped-down bot-check or
+redirect page instead of the real content, which won't contain either your
+`out_of_stock_phrases` or `in_stock_phrases`. Setting `in_stock_phrases` is
+what protects you here: without it, a page with no recognizable text
+defaults to "in stock" (a false alert); with it, an unrecognizable page
+correctly becomes `UNKNOWN` and stays silent instead.
 
 ## Files
 

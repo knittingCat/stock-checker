@@ -99,12 +99,37 @@ def send_alert(title: str, message: str) -> None:
         log(f"osascript alert failed (exit {result.returncode}) for {message!r}: {result.stderr.strip()}")
 
 
-def get_urls(config: dict) -> list:
-    urls = config.get("urls")
-    if urls:
-        return urls
-    legacy_url = config.get("url")  # older configs used a single "url" key
-    return [legacy_url] if legacy_url else []
+def get_url_entries(config: dict) -> list:
+    """Return a list of {"url", "out_of_stock_phrases", "in_stock_phrases"} dicts.
+
+    Each entry in config["urls"] can be a plain URL string (uses the
+    top-level phrase lists as defaults) or an object like
+    {"url": "...", "out_of_stock_phrases": [...], "in_stock_phrases": [...]}
+    to override the phrases for just that URL.
+    """
+    raw_urls = config.get("urls")
+    if not raw_urls:
+        legacy_url = config.get("url")  # older configs used a single "url" key
+        raw_urls = [legacy_url] if legacy_url else []
+
+    default_out = config.get("out_of_stock_phrases", [])
+    default_in = config.get("in_stock_phrases", [])
+
+    entries = []
+    for raw in raw_urls:
+        if isinstance(raw, dict):
+            entries.append({
+                "url": raw.get("url"),
+                "out_of_stock_phrases": raw.get("out_of_stock_phrases", default_out),
+                "in_stock_phrases": raw.get("in_stock_phrases", default_in),
+            })
+        else:
+            entries.append({
+                "url": raw,
+                "out_of_stock_phrases": default_out,
+                "in_stock_phrases": default_in,
+            })
+    return [e for e in entries if e["url"]]
 
 
 def main() -> None:
@@ -113,8 +138,8 @@ def main() -> None:
     url_filter = next((a for a in args if a != "--test"), None)
 
     config = load_json(CONFIG_PATH, None)
-    urls = get_urls(config) if config else []
-    if not config or not urls or any("example.com" in u for u in urls):
+    entries = get_url_entries(config) if config else []
+    if not config or not entries or any("example.com" in e["url"] for e in entries):
         message = "Config missing or still has placeholder URL(s) — run setup.py first."
         log(message)
         if test_mode:
@@ -122,11 +147,11 @@ def main() -> None:
         sys.exit(0)
 
     if url_filter:
-        matched = [u for u in urls if url_filter.lower() in u.lower()]
+        matched = [e for e in entries if url_filter.lower() in e["url"].lower()]
         if not matched:
             print(f"No configured URL contains '{url_filter}'.")
             sys.exit(1)
-        urls = matched
+        entries = matched
 
     interval_minutes = config.get("check_interval_minutes", 60)
     state = load_json(STATE_PATH, {"last_check": None, "urls": {}})
@@ -141,7 +166,8 @@ def main() -> None:
 
     alerts_to_send = []  # (title, url) — fired only after state is saved, see below
 
-    for url in urls:
+    for entry in entries:
+        url = entry["url"]
         url_state = url_states.setdefault(url, {"last_status": None, "last_notified_status": None})
 
         try:
@@ -153,7 +179,7 @@ def main() -> None:
             continue
 
         page_text = strip_html(html)
-        status = determine_status(page_text, config)
+        status = determine_status(page_text, entry)
         log(f"Checked {url} -> {status}")
         if test_mode:
             print(f"{url} -> {status}")
