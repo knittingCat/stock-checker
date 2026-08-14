@@ -120,10 +120,13 @@ silently checking everything.
 ## Notifications
 
 Notifications are sent once per state transition — when the page flips from
-out-of-stock to in-stock, or back again — not on every single check. If
-macOS notifications don't seem to be appearing, check System Settings →
-Notifications and make sure Terminal (or whatever app runs the script) is
-allowed to notify.
+out-of-stock to in-stock, or back again — not on every single check. The
+very first check of a newly-added URL never alerts by itself; it just
+records that page's current status as the baseline, so you don't get an
+alert immediately after running `setup.py` just because a URL had never
+been checked before. If macOS notifications don't seem to be appearing,
+check System Settings → Notifications and make sure Terminal (or whatever
+app runs the script) is allowed to notify.
 
 ## Customizing detection
 

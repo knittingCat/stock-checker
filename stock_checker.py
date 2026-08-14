@@ -160,10 +160,11 @@ def main() -> None:
             log(f"Could not determine stock status for {url} — check in_stock_phrases/out_of_stock_phrases in config.json.")
         else:
             previously_notified = url_state.get("last_notified_status")
-            if test_mode or status != previously_notified:
-                url_state["last_notified_status"] = status
+            is_first_check = previously_notified is None
+            if test_mode or (not is_first_check and status != previously_notified):
                 title = "Back in stock!" if status == "IN" else "Out of stock"
                 alerts_to_send.append((title, url))
+            url_state["last_notified_status"] = status  # record baseline even when not alerting
 
         url_state["last_status"] = status
 
