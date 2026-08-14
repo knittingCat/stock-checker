@@ -10,7 +10,6 @@ CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
 
 
 def check_url(url: str) -> None:
-    print(f"  Visiting {url} ...")
     try:
         fetch_page(url)
     except Exception as exc:  # network errors, 403s, timeouts, etc.
