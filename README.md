@@ -56,11 +56,14 @@ local `config.json` (gitignored, so your URL/config never gets committed).
 This registers a `launchd` agent that wakes up every 10 minutes. By default
 it only actually re-fetches the page once an hour (`check_interval_minutes`
 in `config.json`) to avoid hammering the site — lower that value if you want
-tighter polling, e.g. every 10 minutes:
+tighter polling, e.g. every 10 minutes. Open `config.json` in a text editor:
 
 ```bash
-python3 -c "import json,pathlib; p=pathlib.Path('config.json'); c=json.loads(p.read_text()); c['check_interval_minutes']=10; p.write_text(json.dumps(c, indent=2)+'\n')"
+open -e config.json
 ```
+
+and change `"check_interval_minutes": 60` to `"check_interval_minutes": 10`
+(or whatever value you want), then save and close the editor.
 
 To stop the background job:
 
