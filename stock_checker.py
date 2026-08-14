@@ -94,7 +94,9 @@ def send_alert(title: str, message: str) -> None:
         f'with title "{escape_applescript(title)}" '
         f'buttons {{"OK"}} default button "OK"'
     )
-    subprocess.run(["osascript", "-e", script], check=False)
+    result = subprocess.run(["osascript", "-e", script], check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        log(f"osascript alert failed (exit {result.returncode}) for {message!r}: {result.stderr.strip()}")
 
 
 def get_urls(config: dict) -> list:
