@@ -57,17 +57,21 @@ note near the top of this README about what that means).
 ./install.sh
 ```
 
-This registers a `launchd` agent that wakes up every 10 minutes. By default
-it only actually re-fetches the page once an hour (`check_interval_minutes`
-in `config.json`) to avoid hammering the site — lower that value if you want
-tighter polling, e.g. every 10 minutes. Open `config.json` in a text editor:
+This registers a `launchd` agent that wakes up every minute and checks
+whether it's actually time to re-fetch the page yet. By default it only
+actually re-fetches once an hour (`check_interval_minutes` in
+`config.json`) to avoid hammering the site — the real polling cadence
+follows this value directly (down to once a minute), so it's the only
+setting you need to change for tighter or looser polling. Open `config.json`
+in a text editor:
 
 ```bash
 open -e config.json
 ```
 
 and change `"check_interval_minutes": 60` to `"check_interval_minutes": 10`
-(or whatever value you want), then save and close the editor.
+(or whatever value you want, minimum meaningful value is `1`), then save
+and close the editor.
 
 To stop the background job:
 
@@ -77,12 +81,12 @@ To stop the background job:
 
 ### What happens while your Mac is asleep?
 
-`launchd` jobs don't run while the Mac is asleep — the 10-minute timer pauses
+`launchd` jobs don't run while the Mac is asleep — the wake-up timer pauses
 along with everything else, so no checks (and no alerts) happen during that
 time. When the Mac wakes up, it doesn't try to catch up on every missed
-interval; it just resumes based on wall-clock time, and since more than 10
-minutes have elapsed, it fires again almost immediately after wake, then
-continues on the normal cadence from there. No action is needed from you.
+minute; it just resumes based on wall-clock time and fires again almost
+immediately after wake, then continues on the normal cadence from there. No
+action is needed from you.
 
 One caveat: if the product went in stock and back out again entirely during
 a sleep window (e.g. overnight), that change will be missed — it only knows
