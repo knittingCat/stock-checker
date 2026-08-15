@@ -71,6 +71,35 @@ def strip_html(html: str) -> str:
     return re.sub(r"\s+", " ", text).lower()
 
 
+ANTI_BOT_PHRASES = [
+    "captcha",
+    "are you a robot",
+    "are you a human",
+    "verify you are human",
+    "verify you're human",
+    "unusual traffic",
+    "automated access",
+    "automated requests",
+    "enable javascript and cookies",
+    "access denied",
+    "request blocked",
+    "unusual activity",
+    "bot detection",
+    "security check",
+    "click the button below to continue",
+    "prove you are human",
+    "checking your browser",
+]
+
+ANTI_BOT_MIN_LENGTH = 400  # real product pages are essentially always longer than this
+
+
+def looks_like_anti_bot_page(page_text: str) -> bool:
+    if len(page_text) < ANTI_BOT_MIN_LENGTH:
+        return True
+    return any(phrase in page_text for phrase in ANTI_BOT_PHRASES)
+
+
 def determine_status(page_text: str, config: dict) -> str:
     out_phrases = [p.lower() for p in config.get("out_of_stock_phrases", [])]
     in_phrases = [p.lower() for p in config.get("in_stock_phrases", [])]

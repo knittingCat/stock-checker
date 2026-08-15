@@ -4,7 +4,7 @@
 import json
 from pathlib import Path
 
-from stock_checker import fetch_page, strip_html
+from stock_checker import fetch_page, looks_like_anti_bot_page, strip_html
 
 CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
 
@@ -54,6 +54,12 @@ def discover_phrases(url: str) -> dict:
     text = fetch_url_text(url)
     if text is None:
         return {"url": url}
+
+    if looks_like_anti_bot_page(text):
+        print("  Warning: this looks like it might be an anti-bot/verification page rather than "
+              "the real product page (short or unrecognizable content). Detection for this URL may "
+              "be unreliable — the background checker will keep retrying automatically, but you may "
+              "want to double check this URL in a real browser.")
 
     answer = input("  Is this currently in stock or out of stock? [in/out/skip]: ").strip().lower()
     if answer not in ("in", "out"):

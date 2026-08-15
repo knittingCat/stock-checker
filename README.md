@@ -51,6 +51,15 @@ enter each URL, it immediately tries fetching it and prints an error message
 if that fails (e.g. a 403 error if the site blocks the request — see the
 note near the top of this README about what that means).
 
+If the fetch succeeds but the page itself looks suspicious — very short
+content, or phrasing like "captcha," "are you a robot," or "click the
+button below to continue" — it prints a warning that this might be an
+anti-bot/verification page rather than the real product page, since
+detection based on that content would be unreliable. This is common on
+larger sites that intermittently block plain script requests; the
+background checker retries automatically when this happens during normal
+monitoring (see the note near the top of this README).
+
 For each URL that fetches successfully, it then asks:
 
 ```
