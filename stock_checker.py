@@ -99,6 +99,22 @@ def send_alert(title: str, message: str) -> None:
         log(f"osascript alert failed (exit {result.returncode}) for {message!r}: {result.stderr.strip()}")
 
 
+def fetch_and_classify(entry: dict, attempts: int = 2) -> str:
+    """Fetch a URL and classify it, retrying once if the result is UNKNOWN.
+
+    Large sites sometimes return a stripped-down bot-check/redirect page
+    instead of the real one; a second attempt often gets the real page.
+    Network errors are not retried here — they propagate to the caller.
+    """
+    status = "UNKNOWN"
+    for attempt in range(attempts):
+        html = fetch_page(entry["url"])
+        status = determine_status(strip_html(html), entry)
+        if status != "UNKNOWN":
+            return status
+    return status
+
+
 def get_url_entries(config: dict) -> list:
     """Return a list of {"url", "out_of_stock_phrases", "in_stock_phrases"} dicts.
 
@@ -171,15 +187,13 @@ def main() -> None:
         url_state = url_states.setdefault(url, {"last_status": None, "last_notified_status": None})
 
         try:
-            html = fetch_page(url)
+            status = fetch_and_classify(entry)
         except Exception as exc:  # network errors, timeouts, etc.
             log(f"Fetch failed for {url}: {exc}")
             if test_mode:
                 print(f"{url} -> Fetch failed: {exc}")
             continue
 
-        page_text = strip_html(html)
-        status = determine_status(page_text, entry)
         log(f"Checked {url} -> {status}")
         if test_mode:
             print(f"{url} -> {status}")
