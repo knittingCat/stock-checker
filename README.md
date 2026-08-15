@@ -51,6 +51,22 @@ enter each URL, it immediately tries fetching it and prints an error message
 if that fails (e.g. a 403 error if the site blocks the request — see the
 note near the top of this README about what that means).
 
+For each URL that fetches successfully, it then asks:
+
+```
+Is this currently in stock or out of stock? [in/out/skip]:
+```
+
+Answer with the item's *actual* real-world status right now, and it scans
+the page for a set of common phrases (`"sold out"`, `"add to cart"`,
+`"currently unavailable"`, etc.) and only keeps the ones that actually
+appear — rather than you having to guess which exact wording a site uses.
+If the page also contains a phrase that contradicts what you said (e.g. an
+"Add to Cart" button present on a page you said is out of stock), it's
+called out and excluded automatically so it can't cause a false alert
+later. Answering `skip` (or if nothing recognizable is found) leaves that
+URL using the shared top-level phrase lists instead.
+
 ## Run it in the background
 
 ```bash
