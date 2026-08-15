@@ -99,13 +99,14 @@ def main() -> None:
     config.setdefault("out_of_stock_phrases", ["out of stock", "sold out", "unavailable"])
     config.setdefault("check_interval_minutes", 60)
 
-    urls = []
+    urls = {}
     print("Enter product page URLs to monitor, one per line.")
     print("Press Enter on a blank line when you're done.\n")
 
     while True:
-        label = f"URL #{len(urls) + 1}" if urls else "URL #1 (required)"
-        url = input(f"{label}: ").strip()
+        label = f"URL{len(urls) + 1}"
+        prompt = f"{label}" if urls else f"{label} (required)"
+        url = input(f"{prompt}: ").strip()
         if not url:
             if urls:
                 break
@@ -114,10 +115,10 @@ def main() -> None:
 
         entry = discover_phrases(url)
         # collapse to a plain string if no overrides were actually found
-        urls.append(entry["url"] if set(entry) == {"url"} else entry)
+        urls[label] = entry["url"] if set(entry) == {"url"} else entry
 
     config["urls"] = urls
-    config.pop("url", None)  # replaced by the "urls" list
+    config.pop("url", None)  # replaced by the "urls" object
 
     CONFIG_PATH.write_text(json.dumps(config, indent=2) + "\n")
 

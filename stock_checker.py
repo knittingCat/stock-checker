@@ -147,12 +147,18 @@ def fetch_and_classify(entry: dict, attempts: int = 2) -> str:
 def get_url_entries(config: dict) -> list:
     """Return a list of {"url", "out_of_stock_phrases", "in_stock_phrases"} dicts.
 
-    Each entry in config["urls"] can be a plain URL string (uses the
+    config["urls"] can be:
+      - a labeled object, e.g. {"URL1": "https://...", "URL2": "https://..."}
+      - a plain list, e.g. ["https://...", "https://..."] (older configs)
+
+    Each individual entry can itself be a plain URL string (uses the
     top-level phrase lists as defaults) or an object like
     {"url": "...", "out_of_stock_phrases": [...], "in_stock_phrases": [...]}
     to override the phrases for just that URL.
     """
     raw_urls = config.get("urls")
+    if isinstance(raw_urls, dict):
+        raw_urls = list(raw_urls.values())
     if not raw_urls:
         legacy_url = config.get("url")  # older configs used a single "url" key
         raw_urls = [legacy_url] if legacy_url else []

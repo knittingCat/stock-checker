@@ -172,27 +172,31 @@ and close the editor:
 
 ```json
 {
-  "urls": ["https://example.com/product"],
+  "urls": {
+    "URL1": "https://example.com/product"
+  },
   "out_of_stock_phrases": ["out of stock", "sold out"],
   "check_interval_minutes": 60
 }
 ```
 
 Re-run `python3 setup.py` any time to change which URLs are monitored —
-it overwrites the `urls` list and clears old notification state. You can
-list as many product URLs as you want; each one gets its own independent
-in-stock/out-of-stock tracking and alerts. By default the top-level
-`out_of_stock_phrases`/`in_stock_phrases` lists apply to every URL. If
-none of the `out_of_stock_phrases` are found on a page, that product is
-considered in stock. You can optionally add an `in_stock_phrases` list too
-— if present, a page is only considered in stock when one of these phrases
-is actually found (useful for sites that don't have a clear
-"unavailable"-style label but do have a reliable "Add to Cart" button or
-similar):
+it overwrites the `urls` object and clears old notification state. You can
+list as many product URLs as you want (labeled `URL1`, `URL2`, ...); each
+one gets its own independent in-stock/out-of-stock tracking and alerts. By
+default the top-level `out_of_stock_phrases`/`in_stock_phrases` lists apply
+to every URL. If none of the `out_of_stock_phrases` are found on a page,
+that product is considered in stock. You can optionally add an
+`in_stock_phrases` list too — if present, a page is only considered in
+stock when one of these phrases is actually found (useful for sites that
+don't have a clear "unavailable"-style label but do have a reliable
+"Add to Cart" button or similar):
 
 ```json
 {
-  "urls": ["https://example.com/product"],
+  "urls": {
+    "URL1": "https://example.com/product"
+  },
   "out_of_stock_phrases": ["out of stock", "sold out"],
   "in_stock_phrases": ["add to cart", "add to bag", "buy now"],
   "check_interval_minutes": 60
@@ -209,18 +213,18 @@ doesn't always fit every URL you're monitoring. Instead of a plain string,
 any entry in `urls` can be an object with its own `out_of_stock_phrases`
 and/or `in_stock_phrases`, overriding the top-level defaults for just that
 URL. You can freely mix plain strings (using the shared defaults) and
-override objects in the same `urls` list:
+override objects under different labels in the same `urls` object:
 
 ```json
 {
-  "urls": [
-    "https://example.com/uses-the-shared-defaults",
-    {
+  "urls": {
+    "URL1": "https://example.com/uses-the-shared-defaults",
+    "URL2": {
       "url": "https://example.com/needs-its-own-rules",
       "out_of_stock_phrases": ["currently unavailable"],
       "in_stock_phrases": ["add to cart"]
     }
-  ],
+  },
   "out_of_stock_phrases": ["out of stock", "sold out"],
   "check_interval_minutes": 60
 }
