@@ -56,9 +56,13 @@ content, or phrasing like "captcha," "are you a robot," or "click the
 button below to continue" — it prints a warning that this might be an
 anti-bot/verification page rather than the real product page, since
 detection based on that content would be unreliable. This is common on
-larger sites that intermittently block plain script requests; the
-background checker retries automatically when this happens during normal
-monitoring (see the note near the top of this README).
+larger sites that intermittently block plain script requests.
+
+During normal monitoring (not just setup), whenever a check comes back
+`UNKNOWN` the checker automatically retries the fetch once more before
+giving up for that cycle — often enough to get past an intermittent
+anti-bot page. If both attempts fail to produce a recognizable status, it
+just logs `UNKNOWN` and stays silent (no alert) rather than guessing.
 
 For each URL that fetches successfully, it then asks:
 
