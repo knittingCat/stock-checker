@@ -38,6 +38,19 @@ macOS installer and run it), then reopen Terminal and try again.
 
 ## Setup
 
+### With tlib
+
+```bash
+tlib install knittingCat/stock-checker
+stock-checker-setup
+```
+
+This installs `stock-checker`, `stock-checker-setup`, `stock-checker-install`,
+and `stock-checker-uninstall` as commands. See
+[BlueGrayFoo/TLIB](https://github.com/BlueGrayFoo/TLIB) for `tlib` itself.
+
+### Without tlib
+
 ```bash
 git clone https://github.com/knittingCat/stock-checker.git
 cd stock-checker
@@ -82,6 +95,14 @@ URL using the shared top-level phrase lists instead.
 
 ## Run it in the background
 
+With tlib:
+
+```bash
+stock-checker-install
+```
+
+Without tlib:
+
 ```bash
 ./install.sh
 ```
@@ -104,6 +125,14 @@ and close the editor.
 
 To stop the background job:
 
+With tlib:
+
+```bash
+stock-checker-uninstall
+```
+
+Without tlib:
+
 ```bash
 ./uninstall.sh
 ```
@@ -123,16 +152,18 @@ what the page looks like at the moment it actually checks.
 
 ## Test it manually
 
-Make sure you're in the `stock-checker` directory first (otherwise Python
-won't find the file):
+With tlib, force an immediate check (bypasses the throttle) and print the
+result:
+
+```bash
+stock-checker --test
+```
+
+Without tlib, make sure you're in the `stock-checker` directory first
+(otherwise Python won't find the file):
 
 ```bash
 cd ~/stock-checker
-```
-
-Then force an immediate check (bypasses the throttle) and print the result:
-
-```bash
 python3 stock_checker.py --test
 ```
 
@@ -143,6 +174,8 @@ If you're monitoring more than one URL, add part of the URL you want to
 test to only check that one instead of all of them:
 
 ```bash
+stock-checker --test mechanicalgifs
+# or, without tlib:
 python3 stock_checker.py --test mechanicalgifs
 ```
 
@@ -257,3 +290,4 @@ correctly becomes `UNKNOWN` and stays silent instead.
 - `setup.py` — interactive one-time (or repeatable) setup for the URL
 - `install.sh` / `uninstall.sh` — manage the background `launchd` job
 - `com.stockchecker.plist.template` — launchd job template used by `install.sh`
+- `info.xml` / `bin/` — `tlib` package manifest and command wrappers

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+REPO_DIR="$HOME/.tlib/repos/knittingCat/stock-checker"
+TARGET=$(find "$REPO_DIR" -maxdepth 2 -name stock_checker.py 2>/dev/null | head -1)
+if [ -z "$TARGET" ]; then
+  echo "stock-checker: could not find stock_checker.py under $REPO_DIR" >&2
+  exit 1
+fi
+exec python3 "$TARGET" "$@"

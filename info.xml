@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tlib version="1">
+  <package name="stock-checker" version="1.0.0">
+    <requires>
+      <tool name="python3"/>
+    </requires>
+    <commands>
+      <command name="stock-checker" output="bin/stock-checker"/>
+      <command name="stock-checker-setup" output="bin/stock-checker-setup"/>
+      <command name="stock-checker-install" output="bin/stock-checker-install"/>
+      <command name="stock-checker-uninstall" output="bin/stock-checker-uninstall"/>
+    </commands>
+  </package>
+</tlib>

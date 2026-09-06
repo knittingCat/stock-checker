@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+REPO_DIR="$HOME/.tlib/repos/knittingCat/stock-checker"
+TARGET=$(find "$REPO_DIR" -maxdepth 2 -name uninstall.sh 2>/dev/null | head -1)
+if [ -z "$TARGET" ]; then
+  echo "stock-checker-uninstall: could not find uninstall.sh under $REPO_DIR" >&2
+  exit 1
+fi
+exec bash "$TARGET" "$@"
